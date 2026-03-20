@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RISPERIDONE - The Red Static</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #020203;
+      font-family: Arial, Helvetica, sans-serif;
+      user-select: none;
+    }
+    #renderCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      outline: none;
+      opacity: 1;
+    }
+    #noiseCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      image-rendering: pixelated;
+      pointer-events: none;
+      opacity: 0.02;
+      mix-blend-mode: screen;
+    }
+    #redNoiseCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      image-rendering: pixelated;
+      pointer-events: none;
+      opacity: 0;
+      mix-blend-mode: screen;
+    }
+    #vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at center,
+          rgba(0,0,0,0) 0%,
+          rgba(0,0,0,0.18) 48%,
+          rgba(0,0,0,0.52) 75%,
+          rgba(0,0,0,0.88) 100%);
+    }
+    #scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.16;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,0.03) 0px,
+        rgba(255,255,255,0.01) 1px,
+        rgba(0,0,0,0.05) 2px,
+        rgba(0,0,0,0.05) 4px
+      );
+      mix-blend-mode: overlay;
+    }
+    #ui {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #e8e8ea;
+      text-align: center;
+      pointer-events: none;
+      transition: opacity 300ms ease;
+    }
+    #ui.hidden {
+      opacity: 0;
+    }
+    .panel {
+      padding: 22px 26px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(4, 4, 6, 0.28);
+      backdrop-filter: blur(2px);
+      box-shadow: 0 0 60px rgba(0,0,0,0.35);
+      border-radius: 16px;
+      max-width: min(86vw, 520px);
+    }
+    .title {
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      font-size: clamp(22px, 3vw, 34px);
+      margin-bottom: 10px;
+    }
+    .sub {
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(232,232,234,0.8);
+      margin-bottom: 12px;
+    }
+    .meta {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(232,232,234,0.56);
+    }
+    #timerText {
+      position: fixed;
+      left: 16px;
+      bottom: 14px;
+      color: rgba(235,235,240,0.7);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      pointer-events: none;
+      text-shadow: 0 0 12px rgba(0,0,0,0.55);
+    }
+    #goalText {
+      position: fixed;
+      left: 16px;
+      bottom: 40px;
+      color: rgba(235,235,240,0.7);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      pointer-events: none;
+      text-shadow: 0 0 12px rgba(0,0,0,0.55);
+    }
+    #goalText.warning {
+      color: #ffff00;
+      animation: goalWarning 0.5s infinite;
+    }
+    @keyframes goalWarning {
+      0%, 100% { color: #ffff00; }
+      50% { color: #ff6464; }
+    }
+    #inventoryUI {
+      position: fixed;
+      right: 16px;
+      top: 16px;
+      color: #e8e8ea;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+      pointer-events: auto;
+      text-shadow: 0 0 12px rgba(0,0,0,0.55);
+      z-index: 100;
+    }
+    .inventory-item {
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(4, 4, 6, 0.4);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 200ms ease;
+    }
+    .inventory-item:hover:not(.disabled) {
+      border-color: rgba(255,255,255,0.4);
+      background: rgba(4, 4, 6, 0.6);
+      box-shadow: 0 0 10px rgba(255,100,100,0.3);
+    }
+    .inventory-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .inventory-item.golden {
+      border-color: #ffdd00;
+      background: rgba(255, 221, 0, 0.1);
+      box-shadow: 0 0 15px rgba(255, 221, 0, 0.5);
+    }
+    .inventory-item.golden:hover {
+      box-shadow: 0 0 25px rgba(255, 221, 0, 0.8);
+    }
+    .item-name {
+      font-weight: bold;
+      color: #ff6464;
+    }
+    .item-name.golden {
+      color: #ffdd00;
+    }
+    .item-status {
+      font-size: 11px;
+      color: rgba(232,232,234,0.6);
+      margin-top: 4px;
+    }
+    .item-status.ready {
+      color: #64ff64;
+      font-weight: bold;
+    }
+    .item-status.golden {
+      color: #ffdd00;
+      font-weight: bold;
+    }
+    #runText {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      font-weight: bold;
+      letter-spacing: 0.3em;
+      color: #ff4444;
+      text-shadow: 
+        0 0 20px rgba(255, 68, 68, 0.8),
+        0 0 40px rgba(255, 68, 68, 0.5),
+        0 0 60px rgba(255, 0, 0, 0.3);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 100ms ease;
+      z-index: 99;
+    }
+    #runText.active {
+      animation: runPulse 0.6s infinite;
+    }
+    @keyframes runPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.9; }
+    }
+    #gameOverScreen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      pointer-events: auto;
+    }
+    #gameOverScreen.show {
+      display: flex;
+    }
+    .game-over-panel {
+      text-align: center;
+      color: #ff4444;
+      padding: 40px;
+      border: 2px solid #ff4444;
+      background: rgba(20, 0, 0, 0.8);
+      border-radius: 16px;
+      max-width: 500px;
+      box-shadow: 0 0 60px rgba(255, 0, 0, 0.4);
+    }
+    .game-over-panel.victory {
+      color: #ffdd00;
+      border-color: #ffdd00;
+      background: rgba(50, 50, 0, 0.8);
+      box-shadow: 0 0 60px rgba(255, 221, 0, 0.4);
+    }
+    .game-over-title {
+      font-size: 48px;
+      font-weight: bold;
+      letter-spacing: 0.3em;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+      animation: glitch 0.3s infinite;
+    }
+    .game-over-title.victory {
+      text-shadow: 0 0 20px rgba(255, 221, 0, 0.8);
+      color: #ffdd00;
+    }
+    @keyframes glitch {
+      0%, 100% { text-shadow: 0 0 20px rgba(255, 68, 68, 0.8); }
+      50% { text-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 2px 2px 0 rgba(255, 68, 68, 0.6); }
+    }
+    .game-over-stats {
+      font-size: 16px;
+      color: rgba(255, 100, 100, 0.9);
+      margin: 20px 0;
+      line-height: 1.8;
+      letter-spacing: 0.1em;
+    }
+    .game-over-stats.victory {
+      color: rgba(255, 221, 0, 0.9);
+    }
+    .game-over-button {
+      margin-top: 30px;
+      padding: 12px 30px;
+      border: 1px solid #ff4444;
+      background: rgba(255, 68, 68, 0.2);
+      color: #ff4444;
+      font-size: 14px;
+      letter-spacing: 0.15em;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 200ms ease;
+      text-transform: uppercase;
+    }
+    .game-over-button.victory {
+      border-color: #ffdd00;
+      background: rgba(255, 221, 0, 0.2);
+      color: #ffdd00;
+    }
+    .game-over-button:hover {
+      background: rgba(255, 68, 68, 0.4);
+      box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+    }
+    .game-over-button.victory:hover {
+      background: rgba(255, 221, 0, 0.4);
+      box-shadow: 0 0 20px rgba(255, 221, 0, 0.5);
+    }
+    #blackoutScreen {
+      position: fixed;
+      inset: 0;
+      background: #000000;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 2s ease;
+    }
+    #blackoutScreen.active {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="renderCanvas"></canvas>
+  <canvas id="noiseCanvas"></canvas>
+  <canvas id="redNoiseCanvas"></canvas>
+  <div id="vignette"></div>
+  <div id="scanlines"></div>
+  <div id="ui">
+    <div class="panel">
+      <div class="title">Infinite Static Maze</div>
+      <div class="sub" id="subtitle">Click to lock the cursor and enter.</div>
+      <div class="meta">WASD to move • Mouse to look • V to sprint �� E to use medicine</div>
+    </div>
+  </div>
+  <div id="timerText">00:00</div>
+  <div id="goalText">GOAL: SURVIVE 5 MINUTES</div>
+  <div id="inventoryUI">
+    <div id="inventoryItems"></div>
+  </div>
+  <div id="runText">RUN</div>
+  <div id="blackoutScreen"></div>
+  <div id="gameOverScreen">
+    <div class="game-over-panel">
+      <div class="game-over-title">GAME OVER</div>
+      <div class="game-over-stats" id="gameOverStats">
+        You were caught by the hallucinations.<br>
+        <span id="finalTime">Time: 00:00</span>
+      </div>
+      <button class="game-over-button" onclick="location.reload()">RESTART</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script>
+
+const canvas = document.getElementById("renderCanvas");
+const noiseCanvas = document.getElementById("noiseCanvas");
+const noiseCtx = noiseCanvas.getContext("2d");
+const redNoiseCanvas = document.getElementById("redNoiseCanvas");
+const redNoiseCtx = redNoiseCanvas.getContext("2d");
+const ui = document.getElementById("ui");
+const subtitle = document.getElementById("subtitle");
+const timerText = document.getElementById("timerText");
+const goalText = document.getElementById("goalText");
+const runText = document.getElementById("runText");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const gameOverPanel = gameOverScreen.querySelector('.game-over-panel');
+const gameOverTitle = gameOverPanel.querySelector('.game-over-title');
+const gameOverStats = document.getElementById("gameOverStats");
+const finalTimeText = document.getElementById("finalTime");
+const inventoryUI = document.getElementById("inventoryItems");
+const blackoutScreen = document.getElementById("blackoutScreen");
+const gameOverButton = gameOverPanel.querySelector('.game-over-button');
+
+const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, adaptToDeviceRatio: true });
+function resizeOverlays() {
+  engine.resize();
+}
+window.addEventListener("resize", resizeOverlays);
+
+const scene = new BABYLON.Scene(engine);
+scene.clearColor = new BABYLON.Color4(0.02, 0.02, 0.025, 1);
+scene.collisionsEnabled = true;
+scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
+scene.fogColor = new BABYLON.Color3(0.08, 0.08, 0.085);
+scene.fogDensity = 0.024;
+scene.ambientColor = new BABYLON.Color3(0.09, 0.09, 0.1);
+scene.gravity = new BABYLON.Vector3(0, -0.3, 0);
+
+const camera = new BABYLON.UniversalCamera("camera", new BABYLON.Vector3(0, 2.35, 0), scene);
+camera.attachControl(canvas, true);
+camera.speed = 1.2;
+camera.angularSensibility = 3800;
+camera.inertia = 0.05;
+camera.applyGravity = true;
+camera.checkCollisions = true;
+camera.ellipsoid = new BABYLON.Vector3(0.7, 1.8, 0.7);
+camera.ellipsoidOffset = new BABYLON.Vector3(0, 0.9, 0);
+camera.minZ = 0.05;
+camera.keysUp = [87];
+camera.keysDown = [83];
+camera.keysLeft = [65];
+camera.keysRight = [68];
+scene.activeCamera = camera;
+
+const hemi = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0, 1, 0), scene);
+hemi.intensity = 0.22;
+hemi.diffuse = new BABYLON.Color3(0.9, 0.9, 0.95);
+hemi.groundColor = new BABYLON.Color3(0.08, 0.08, 0.08);
+
+const point = new BABYLON.PointLight("point", new BABYLON.Vector3(0, 6, 0), scene);
+point.intensity = 0.18;
+point.diffuse = new BABYLON.Color3(0.8, 0.8, 0.8);
+
+const CELL_SIZE = 12;
+const CHUNK_CELLS = 8;
+const WALL_THICK = 0.55;
+const WALL_H = 3.5;
+const HALF_CELL = CELL_SIZE * 0.5;
+const CHUNK_WORLD = CELL_SIZE * CHUNK_CELLS;
+const RENDER_RADIUS = 3;
+
+const floorMat = new BABYLON.StandardMaterial("floorMat", scene);
+floorMat.diffuseColor = new BABYLON.Color3(0.02, 0.02, 0.02);
+floorMat.specularColor = new BABYLON.Color3(0, 0, 0);
+
+const wallMat = new BABYLON.StandardMaterial("wallMat", scene);
+wallMat.diffuseColor = new BABYLON.Color3(0.52, 0.52, 0.54);
+wallMat.specularColor = new BABYLON.Color3(0.08, 0.08, 0.08);
+
+// Game state
+let gameOver = false;
+let gameWon = false;
+let isSprinting = false;
+const sprintDuration = 5000;
+const sprintCooldown = 3000;
+let sprintActive = false;
+let lastSprintTime = 0;
+
+// Goal system - 5 minutes = 300000 ms
+const GOAL_TIME = 300000;
+const HALLUCINATION_CYCLE = 60000; // 30s on, 30s off
+const HALLUCINATION_ON_DURATION = 30000; // 30 seconds
+let hasVictoryMed = false;
+
+// Inventory system
+const inventory = {
+  risperidone: {
+    name: "Risperidone",
+    lastUsed: -Infinity,
+    cooldown: 35000,
+    description: "Anti-Hallucination Med"
+  },
+  victoryMed: {
+    name: "Final Remedy",
+    lastUsed: -Infinity,
+    cooldown: 0,
+    description: "Ascension",
+    isGolden: true
+  }
+};
+
+function updateInventoryUI() {
+  inventoryUI.innerHTML = '';
+  for (const [key, item] of Object.entries(inventory)) {
+    if (key === 'victoryMed' && !hasVictoryMed) continue;
+    
+    const timeSinceLastUse = performance.now() - item.lastUsed;
+    const isOnCooldown = timeSinceLastUse < item.cooldown;
+    
+    const itemDiv = document.createElement('div');
+    itemDiv.className = `inventory-item ${isOnCooldown ? 'disabled' : ''} ${item.isGolden ? 'golden' : ''}`;
+    
+    let statusText = '';
+    if (key === 'victoryMed') {
+      statusText = 'Press E to ascend';
+    } else if (isOnCooldown) {
+      const remainingSeconds = Math.ceil((item.cooldown - timeSinceLastUse) / 1000);
+      statusText = `Cooldown: ${remainingSeconds}s`;
+    } else {
+      statusText = 'Press E to use';
+    }
+    
+    itemDiv.innerHTML = `
+      <div class="item-name ${item.isGolden ? 'golden' : ''}">${item.name}</div>
+      <div class="item-status ${!isOnCooldown ? 'ready' : ''} ${item.isGolden ? 'golden' : ''}">
+        ${statusText}
+      </div>
+    `;
+    
+    if (!isOnCooldown) {
+      itemDiv.style.cursor = 'pointer';
+      itemDiv.addEventListener('click', () => useItem(key));
+    }
+    
+    inventoryUI.appendChild(itemDiv);
+  }
+}
+
+function useItem(itemKey) {
+  if (itemKey === 'victoryMed') {
+    triggerVictory();
+    return;
+  }
+  
+  const item = inventory[itemKey];
+  
+  const timeSinceLastUse = performance.now() - item.lastUsed;
+  if (timeSinceLastUse < item.cooldown) return;
+  
+  if (itemKey === 'risperidone') {
+    item.lastUsed = performance.now();
+    
+    for (const monster of monsters) {
+      monster.mesh.dispose(true);
+    }
+    monsters.length = 0;
+    
+    runText.classList.remove('active');
+    runText.style.opacity = '0';
+    
+    updateInventoryUI();
+  }
+}
+
+function hash2D(x, z, salt = 0) {
+  let n = Math.imul(x | 0, 374761393) ^ Math.imul(z | 0, 668265263) ^ Math.imul(salt | 0, 1442695041);
+  n = (n ^ (n >>> 13)) >>> 0;
+  n = Math.imul(n, 1274126177) >>> 0;
+  return (n ^ (n >>> 16)) >>> 0;
+}
+
+function edgeOpen(x, z, dir) {
+  const h = hash2D(x, z, dir);
+  return (h % 100) < 44 || (h % 13) === 0 || (((x ^ z) & 7) === 0 && (h % 100) < 72);
+}
+
+const chunks = new Map();
+const monsters = [];
+
+function makeKey(cx, cz) {
+  return `${cx},${cz}`;
+}
+
+function createMergedWallsForChunk(cx, cz, root) {
+  const baseCellX = cx * CHUNK_CELLS;
+  const baseCellZ = cz * CHUNK_CELLS;
+  const originX = baseCellX * CELL_SIZE;
+  const originZ = baseCellZ * CELL_SIZE;
+
+  for (let localX = 0; localX < CHUNK_CELLS; localX++) {
+    let runStart = -1;
+    for (let localZ = 0; localZ < CHUNK_CELLS; localZ++) {
+      const worldX = baseCellX + localX;
+      const worldZ = baseCellZ + localZ;
+      const closed = !edgeOpen(worldX, worldZ, 1);
+      if (closed && runStart < 0) runStart = localZ;
+      const atEnd = localZ === CHUNK_CELLS - 1;
+      if (runStart >= 0 && (!closed || atEnd)) {
+        const runEnd = closed && atEnd ? localZ : localZ - 1;
+        const length = runEnd - runStart + 1;
+        if (length > 0) {
+          const wall = BABYLON.MeshBuilder.CreateBox(
+            `vw_${cx}_${cz}_${localX}_${runStart}_${runEnd}`,
+            {
+              width: WALL_THICK,
+              height: WALL_H,
+              depth: length * CELL_SIZE,
+            },
+            scene
+          );
+          wall.position.x = originX + (localX + 1) * CELL_SIZE;
+          wall.position.y = WALL_H * 0.5;
+          wall.position.z = originZ + (runStart + length * 0.5) * CELL_SIZE;
+          wall.material = wallMat;
+          wall.checkCollisions = true;
+          wall.parent = root;
+        }
+        runStart = -1;
+      }
+    }
+  }
+
+  for (let localZ = 0; localZ < CHUNK_CELLS; localZ++) {
+    let runStart = -1;
+    for (let localX = 0; localX < CHUNK_CELLS; localX++) {
+      const worldX = baseCellX + localX;
+      const worldZ = baseCellZ + localZ;
+      const closed = !edgeOpen(worldX, worldZ, 2);
+      if (closed && runStart < 0) runStart = localX;
+      const atEnd = localX === CHUNK_CELLS - 1;
+      if (runStart >= 0 && (!closed || atEnd)) {
+        const runEnd = closed && atEnd ? localX : localX - 1;
+        const length = runEnd - runStart + 1;
+        if (length > 0) {
+          const wall = BABYLON.MeshBuilder.CreateBox(
+            `hw_${cx}_${cz}_${localZ}_${runStart}_${runEnd}`,
+            {
+              width: length * CELL_SIZE,
+              height: WALL_H,
+              depth: WALL_THICK,
+            },
+            scene
+          );
+          wall.position.x = originX + (runStart + length * 0.5) * CELL_SIZE;
+          wall.position.y = WALL_H * 0.5;
+          wall.position.z = originZ + (localZ + 1) * CELL_SIZE;
+          wall.material = wallMat;
+          wall.checkCollisions = true;
+          wall.parent = root;
+        }
+        runStart = -1;
+      }
+    }
+  }
+}
+
+function createStaticTexture(name, size = 64, isRed = false) {
+  const tex = new BABYLON.DynamicTexture(name, size, scene);
+  const ctx = tex.getContext();
+  const imgData = ctx.createImageData(size, size);
+  const data = imgData.data;
+  
+  for (let i = 0; i < data.length; i += 4) {
+    const rand = Math.random();
+    if (isRed) {
+      data[i] = rand > 0.5 ? 220 : 60;
+      data[i + 1] = rand > 0.6 ? 20 : 5;
+      data[i + 2] = rand > 0.7 ? 20 : 5;
+    } else {
+      data[i] = rand > 0.5 ? 200 : 20;
+      data[i + 1] = rand > 0.6 ? 20 : 10;
+      data[i + 2] = rand > 0.7 ? 20 : 10;
+    }
+    data[i + 3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+  tex.update();
+  return tex;
+}
+
+function createMonster(x, z, hallucination) {
+  const cloudMat = new BABYLON.StandardMaterial(`monsterMat_${Math.random()}`, scene);
+  const staticTex = createStaticTexture(`staticTex_${Math.random()}`, 128, true);
+  cloudMat.diffuseTexture = staticTex;
+  cloudMat.emissiveColor = new BABYLON.Color3(0.6, 0.1, 0.1);
+  cloudMat.specularColor = new BABYLON.Color3(0, 0, 0);
+  
+  const monster = BABYLON.MeshBuilder.CreateSphere(`monster_${x}_${z}`, { diameter: 3, segments: 8 }, scene);
+  monster.position.x = x;
+  monster.position.y = 3;
+  monster.position.z = z;
+  monster.material = cloudMat;
+  monster.isVisible = true;
+  
+  const auraRings = [];
+  for (let i = 0; i < 3; i++) {
+    const auraMat = new BABYLON.StandardMaterial(`auraMat_${Math.random()}`, scene);
+    const auraStaticTex = createStaticTexture(`auraStaticTex_${Math.random()}`, 64, true);
+    auraMat.diffuseTexture = auraStaticTex;
+    auraMat.emissiveColor = new BABYLON.Color3(0.8, 0.15, 0.15);
+    auraMat.wireframe = false;
+    
+    const aura = BABYLON.MeshBuilder.CreateBox(
+      `aura_${x}_${z}_${i}`,
+      { size: 4 + i * 2 },
+      scene
+    );
+    aura.parent = monster;
+    aura.position.y = 0;
+    aura.material = auraMat;
+    aura.isVisible = true;
+    auraRings.push(aura);
+  }
+  
+  return {
+    mesh: monster,
+    auras: auraRings,
+    x: x,
+    z: z,
+    targetX: x,
+    targetZ: z,
+    speed: 0.15 + Math.random() * 0.1,
+    wobble: Math.random() * Math.PI * 2,
+    glitchTimer: 0,
+    staticTexture: staticTex
+  };
+}
+
+function createChunk(cx, cz) {
+  const root = new BABYLON.TransformNode(`chunkRoot_${cx}_${cz}`, scene);
+
+  const floor = BABYLON.MeshBuilder.CreateGround(
+    `floor_${cx}_${cz}`,
+    {
+      width: CHUNK_WORLD,
+      height: CHUNK_WORLD,
+      subdivisions: 1,
+    },
+    scene
+  );
+  floor.position.x = (cx + 0.5) * CHUNK_WORLD;
+  floor.position.y = 0;
+  floor.position.z = (cz + 0.5) * CHUNK_WORLD;
+  floor.material = floorMat;
+  floor.checkCollisions = true;
+  floor.parent = root;
+
+  createMergedWallsForChunk(cx, cz, root);
+
+  chunks.set(makeKey(cx, cz), { root });
+}
+
+function disposeChunk(cx, cz) {
+  const key = makeKey(cx, cz);
+  const chunk = chunks.get(key);
+  if (!chunk) return;
+  chunk.root.dispose(false, true);
+  chunks.delete(key);
+}
+
+function updateChunksAroundPlayer() {
+  const cx = Math.floor(camera.position.x / CHUNK_WORLD);
+  const cz = Math.floor(camera.position.z / CHUNK_WORLD);
+
+  const needed = new Set();
+  for (let dz = -RENDER_RADIUS; dz <= RENDER_RADIUS; dz++) {
+    for (let dx = -RENDER_RADIUS; dx <= RENDER_RADIUS; dx++) {
+      const x = cx + dx;
+      const z = cz + dz;
+      const key = makeKey(x, z);
+      needed.add(key);
+      if (!chunks.has(key)) createChunk(x, z);
+    }
+  }
+
+  for (const key of chunks.keys()) {
+    if (!needed.has(key)) {
+      const [x, z] = key.split(",").map(Number);
+      disposeChunk(x, z);
+    }
+  }
+}
+
+function updateMonsters(isHallucinationActive) {
+  // Only spawn monsters during hallucination periods, max 3
+  if (isHallucinationActive && monsters.length < 3) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 25 + Math.random() * 35;
+    const mx = camera.position.x + Math.cos(angle) * distance;
+    const mz = camera.position.z + Math.sin(angle) * distance;
+    monsters.push(createMonster(mx, mz, 1));
+  }
+
+  let closestMonsterDist = Infinity;
+
+  for (let i = monsters.length - 1; i >= 0; i--) {
+    const monster = monsters[i];
+    
+    const towardsCamX = camera.position.x - monster.mesh.position.x;
+    const towardsCamZ = camera.position.z - monster.mesh.position.z;
+    const distToPlayer = Math.sqrt(towardsCamX * towardsCamX + towardsCamZ * towardsCamZ);
+    
+    closestMonsterDist = Math.min(closestMonsterDist, distToPlayer);
+
+    if (distToPlayer > 2) {
+      const moveAmount = monster.speed * 0.5;
+      monster.mesh.position.x += (towardsCamX / distToPlayer) * moveAmount;
+      monster.mesh.position.z += (towardsCamZ / distToPlayer) * moveAmount;
+    } else {
+      triggerGameOver();
+    }
+    
+    const shakeIntensity = 0.3 + 0.7;
+    monster.mesh.position.x += (Math.random() - 0.5) * shakeIntensity;
+    monster.mesh.position.y += (Math.random() - 0.5) * shakeIntensity * 0.5;
+    monster.mesh.position.z += (Math.random() - 0.5) * shakeIntensity;
+    
+    monster.mesh.rotation.x += (Math.random() - 0.5) * 0.3;
+    monster.mesh.rotation.y += (Math.random() - 0.5) * 0.3;
+    monster.mesh.rotation.z += (Math.random() - 0.5) * 0.3;
+    
+    for (let j = 0; j < monster.auras.length; j++) {
+      const aura = monster.auras[j];
+      aura.isVisible = true;
+      
+      const glitchScale = 0.8 + Math.random() * 0.4;
+      aura.scaling = new BABYLON.Vector3(glitchScale, glitchScale, glitchScale);
+      
+      aura.rotation.x += (Math.random() - 0.5) * 0.25;
+      aura.rotation.y += (Math.random() - 0.5) * 0.25;
+      aura.rotation.z += (Math.random() - 0.5) * 0.25;
+    }
+    
+    if (Math.random() < 0.4) {
+      const ctx = monster.staticTexture.getContext();
+      const size = 128;
+      const imgData = ctx.createImageData(size, size);
+      const data = imgData.data;
+      
+      for (let k = 0; k < data.length; k += 4) {
+        const rand = Math.random();
+        data[k] = rand > 0.5 ? 220 : 60;
+        data[k + 1] = rand > 0.6 ? 20 : 5;
+        data[k + 2] = rand > 0.7 ? 20 : 5;
+        data[k + 3] = 255;
+      }
+      ctx.putImageData(imgData, 0, 0);
+      monster.staticTexture.update();
+    }
+    
+    monster.mesh.isVisible = true;
+  }
+
+  // Remove monsters when hallucination ends
+  if (!isHallucinationActive) {
+    for (let i = monsters.length - 1; i >= 0; i--) {
+      monsters[i].mesh.dispose(true);
+      monsters.splice(i, 1);
+    }
+    runText.style.opacity = '0';
+  } else if (closestMonsterDist < 20 && monsters.length > 0) {
+    runText.classList.add('active');
+    runText.style.opacity = '1';
+  } else {
+    runText.classList.remove('active');
+    runText.style.opacity = '0';
+  }
+}
+
+const skyBox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 2500 }, scene);
+const skyMat = new BABYLON.StandardMaterial("skyMat", scene);
+skyMat.backFaceCulling = false;
+skyMat.disableLighting = true;
+skyMat.specularColor = new BABYLON.Color3(0, 0, 0);
+skyMat.emissiveColor = new BABYLON.Color3(1, 1, 1);
+const skyTex = new BABYLON.DynamicTexture("skyTex", { width: 192, height: 192 }, scene, false);
+skyMat.diffuseTexture = skyTex;
+skyMat.diffuseTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+skyBox.material = skyMat;
+skyBox.infiniteDistance = true;
+
+const startTime = performance.now();
+let pointerLocked = false;
+let lastChunkUpdate = 0;
+let lastInventoryUpdate = 0;
+
+function clamp(v, min, max) {
+  return Math.max(min, Math.min(max, v));
+}
+
+function drawStaticToTexture(level) {
+  const tex = skyTex.getContext();
+  const size = skyTex.getSize();
+  const w = size.width;
+  const h = size.height;
+
+  const img = tex.createImageData(w, h);
+  const data = img.data;
+  const contrast = 40 + level * 60;
+  const tint = 8 + level * 12;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const base = Math.floor(Math.random() * 255);
+    const g = clamp(base * (contrast / 255) + tint, 0, 255);
+    data[i] = g;
+    data[i + 1] = g;
+    data[i + 2] = g;
+    data[i + 3] = 255;
+  }
+
+  tex.putImageData(img, 0, 0);
+  skyTex.update();
+}
+
+function resizeNoiseCanvas() {
+  noiseCanvas.width = 256;
+  noiseCanvas.height = 144;
+  redNoiseCanvas.width = 256;
+  redNoiseCanvas.height = 144;
+}
+resizeNoiseCanvas();
+
+function drawOverlayNoise(level, t) {
+  const w = noiseCanvas.width;
+  const h = noiseCanvas.height;
+  const img = noiseCtx.createImageData(w, h);
+  const data = img.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = Math.random();
+    const base = r < 0.5 ? 0 : 255;
+    const drift = Math.floor((Math.sin(t * 0.003 + i * 0.00002) + 1) * 22);
+    const v = clamp(base * 0.6 + drift + level * 55 + Math.random() * 35, 0, 255);
+    data[i] = v;
+    data[i + 1] = v;
+    data[i + 2] = v;
+    data[i + 3] = 255;
+  }
+
+  noiseCtx.putImageData(img, 0, 0);
+  const opacity = 0.01 + level * 0.25;
+  noiseCanvas.style.opacity = opacity.toFixed(3);
+}
+
+function drawRedNoise(level, t) {
+  const w = redNoiseCanvas.width;
+  const h = redNoiseCanvas.height;
+  const img = redNoiseCtx.createImageData(w, h);
+  const data = img.data;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const rand = Math.random();
+    const intensity = clamp(rand * 200 + level * 100, 0, 255);
+    data[i] = intensity;
+    data[i + 1] = intensity * 0.2;
+    data[i + 2] = intensity * 0.1;
+    data[i + 3] = 255;
+  }
+
+  redNoiseCtx.putImageData(img, 0, 0);
+  redNoiseCanvas.style.opacity = (level * 0.3).toFixed(3);
+}
+
+function triggerGameOver() {
+  if (gameOver || gameWon) return;
+  gameOver = true;
+  engine.stopRenderLoop();
+  
+  const elapsed = performance.now() - startTime;
+  const minutes = Math.floor(elapsed / 60000);
+  const seconds = Math.floor((elapsed % 60000) / 1000);
+  
+  finalTimeText.textContent = `Time Survived: ${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  gameOverScreen.classList.add('show');
+}
+
+function triggerVictory() {
+  if (gameOver || gameWon) return;
+  gameWon = true;
+  engine.stopRenderLoop();
+  
+  // Blackout effect
+  blackoutScreen.classList.add('active');
+  
+  setTimeout(() => {
+    // Change scene to white platform
+    scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
+    
+    // Clear everything
+    scene.meshes.forEach(mesh => {
+      if (mesh.name !== 'skyBox') {
+        mesh.dispose();
+      }
+    });
+    
+    // Create white platform
+    const platform = BABYLON.MeshBuilder.CreateBox("platform", { size: 50 }, scene);
+    platform.position.y = -10;
+    const platformMat = new BABYLON.StandardMaterial("platformMat", scene);
+    platformMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
+    platformMat.emissiveColor = new BABYLON.Color3(0.9, 0.9, 0.9);
+    platform.material = platformMat;
+    
+    // Create divine entity
+    const entity = BABYLON.MeshBuilder.CreateSphere("divineEntity", { diameter: 3, segments: 32 }, scene);
+    entity.position.y = 2;
+    entity.position.z = 10;
+    const entityMat = new BABYLON.StandardMaterial("entityMat", scene);
+    entityMat.emissiveColor = new BABYLON.Color3(1, 0.84, 0);
+    entityMat.diffuseColor = new BABYLON.Color3(1, 0.84, 0);
+    entity.material = entityMat;
+    
+    // Gentle animation
+    let animTime = 0;
+    const animRender = () => {
+      animTime += 0.016;
+      entity.position.y = 2 + Math.sin(animTime * 0.5) * 0.3;
+      entity.rotation.y += 0.01;
+    };
+    
+    engine.runRenderLoop(() => {
+      animRender();
+      scene.render();
+    });
+    
+    setTimeout(() => {
+      engine.stopRenderLoop();
+      
+      // Show victory screen
+      gameOverPanel.classList.add('victory');
+      gameOverTitle.classList.add('victory');
+      gameOverTitle.textContent = 'YOU WIN';
+      gameOverStats.classList.add('victory');
+      gameOverStats.innerHTML = 'You have transcended the hallucinations.<br>The infinite static has released you.';
+      gameOverButton.classList.add('victory');
+      gameOverScreen.classList.add('show');
+      blackoutScreen.classList.remove('active');
+    }, 3000);
+  }, 2000);
+}
+
+window.addEventListener("resize", () => {
+  resizeOverlays();
+  resizeNoiseCanvas();
+});
+
+window.addEventListener("keydown", (e) => {
+  if (gameOver || gameWon) return;
+  
+  if (e.code === "KeyV") {
+    if (!sprintActive && performance.now() - lastSprintTime > sprintCooldown) {
+      sprintActive = true;
+      lastSprintTime = performance.now();
+      camera.speed = 2.4;
+      setTimeout(() => {
+        sprintActive = false;
+        camera.speed = 1.2;
+      }, sprintDuration);
+    }
+    e.preventDefault();
+  }
+  
+  if (e.code === "KeyE") {
+    if (hasVictoryMed) {
+      useItem('victoryMed');
+    } else {
+      useItem('risperidone');
+    }
+    e.preventDefault();
+  }
+});
+
+scene.onPointerDown = () => {
+  if (document.pointerLockElement !== canvas) {
+    canvas.requestPointerLock();
+  }
+};
+
+document.addEventListener("pointerlockchange", () => {
+  pointerLocked = document.pointerLockElement === canvas;
+  ui.classList.toggle("hidden", pointerLocked);
+  subtitle.textContent = pointerLocked ? "You are inside." : "Click to lock the cursor and enter.";
+});
+
+resizeOverlays();
+updateChunksAroundPlayer();
+drawStaticToTexture(0);
+drawOverlayNoise(0, performance.now());
+updateInventoryUI();
+
+engine.runRenderLoop(() => {
+  if (gameOver || gameWon) return;
+  
+  const now = performance.now();
+  const elapsed = now - startTime;
+  
+  // Check if goal reached (5 minutes)
+  if (elapsed >= GOAL_TIME && !hasVictoryMed) {
+    hasVictoryMed = true;
+    updateInventoryUI();
+    goalText.textContent = '*** FINAL REMEDY ACQUIRED ***';
+    goalText.classList.add('warning');
+  }
+  
+  // Hallucination cycle system
+  const cyclePosition = (elapsed - 30000) % HALLUCINATION_CYCLE;
+  const isHallucinationActive = elapsed >= 30000 && cyclePosition < HALLUCINATION_ON_DURATION;
+  
+  // Only update hallucination effects after 30 seconds
+  const hallucination = elapsed >= 30000 ? (isHallucinationActive ? 1 : 0) : 0;
+  
+  const flicker = Math.max(0, Math.sin(now * 0.008) * 0.25 + Math.sin(now * 0.021) * 0.15);
+  const pulse = hallucination > 0.5 ? (flicker * hallucination) : 0;
+
+  scene.fogDensity = 0.024 + hallucination * 0.045;
+  hemi.intensity = 0.22 - hallucination * 0.08;
+  point.intensity = 0.18 + hallucination * 0.05;
+
+  if (hallucination > 0.5 && Math.random() < 0.06) {
+    drawStaticToTexture(hallucination);
+  }
+  drawOverlayNoise(pulse, now);
+  drawRedNoise(hallucination, now);
+
+  updateMonsters(isHallucinationActive);
+
+  // Update inventory UI every 100ms
+  if (now - lastInventoryUpdate > 100) {
+    updateInventoryUI();
+    lastInventoryUpdate = now;
+  }
+
+  const fade = 1 - hallucination * 0.12 - Math.max(0, Math.sin(now * 0.0021) * hallucination * 0.06);
+  canvas.style.opacity = clamp(fade, 0.84, 1).toFixed(3);
+
+  const camChunkX = Math.floor(camera.position.x / CHUNK_WORLD);
+  const camChunkZ = Math.floor(camera.position.z / CHUNK_WORLD);
+  if (now - lastChunkUpdate > 250) {
+    updateChunksAroundPlayer();
+    lastChunkUpdate = now;
+  }
+
+  // Update goal text color as you approach 5 minutes
+  const timeToGoal = GOAL_TIME - elapsed;
+  if (timeToGoal > 0 && timeToGoal < 60000) {
+    goalText.classList.add('warning');
+  } else if (timeToGoal <= 0) {
+    goalText.classList.add('warning');
+  }
+
+  timerText.textContent = `${Math.floor(elapsed / 60000)
+    .toString()
+    .padStart(2, "0")}:${Math.floor((elapsed % 60000) / 1000)
+    .toString()
+    .padStart(2, "0")}  |  ${camChunkX}, ${camChunkZ}`;
+
+  skyBox.rotation.y += 0.0004;
+  scene.render();
+});
+
+  </script>
+</body>
+</html>
