@@ -15,6 +15,7 @@
       font-family: Arial, Helvetica, sans-serif;
       user-select: none;
     }
+
     #renderCanvas {
       position: fixed;
       inset: 0;
@@ -23,17 +24,11 @@
       display: block;
       outline: none;
       opacity: 1;
+      transform-origin: center center;
+      transition: transform 80ms linear, filter 80ms linear, opacity 80ms linear;
     }
-    #noiseCanvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      image-rendering: pixelated;
-      pointer-events: none;
-      opacity: 0.02;
-      mix-blend-mode: screen;
-    }
+
+    #noiseCanvas,
     #redNoiseCanvas {
       position: fixed;
       inset: 0;
@@ -41,9 +36,19 @@
       height: 100vh;
       image-rendering: pixelated;
       pointer-events: none;
-      opacity: 0;
       mix-blend-mode: screen;
+      transition: opacity 80ms linear, transform 80ms linear;
+      transform-origin: center center;
     }
+
+    #noiseCanvas {
+      opacity: 0.02;
+    }
+
+    #redNoiseCanvas {
+      opacity: 0;
+    }
+
     #vignette {
       position: fixed;
       inset: 0;
@@ -51,10 +56,11 @@
       background:
         radial-gradient(circle at center,
           rgba(0,0,0,0) 0%,
-          rgba(0,0,0,0.18) 48%,
-          rgba(0,0,0,0.52) 75%,
-          rgba(0,0,0,0.88) 100%);
+          rgba(0,0,0,0.18) 42%,
+          rgba(0,0,0,0.52) 72%,
+          rgba(0,0,0,0.92) 100%);
     }
+
     #scanlines {
       position: fixed;
       inset: 0;
@@ -69,6 +75,7 @@
       );
       mix-blend-mode: overlay;
     }
+
     #ui {
       position: fixed;
       inset: 0;
@@ -77,11 +84,14 @@
       color: #e8e8ea;
       text-align: center;
       pointer-events: none;
-      transition: opacity 300ms ease;
+      transition: opacity 300ms ease, transform 300ms ease;
     }
+
     #ui.hidden {
       opacity: 0;
+      transform: scale(1.02);
     }
+
     .panel {
       padding: 22px 26px;
       border: 1px solid rgba(255,255,255,0.12);
@@ -91,24 +101,30 @@
       border-radius: 16px;
       max-width: min(86vw, 520px);
     }
+
     .title {
       letter-spacing: 0.22em;
       text-transform: uppercase;
       font-size: clamp(22px, 3vw, 34px);
       margin-bottom: 10px;
     }
+
     .sub {
       font-size: 14px;
       line-height: 1.7;
       color: rgba(232,232,234,0.8);
       margin-bottom: 12px;
+      min-height: 24px;
+      transition: opacity 120ms linear, transform 120ms linear;
     }
+
     .meta {
       font-size: 12px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: rgba(232,232,234,0.56);
     }
+
     #timerText {
       position: fixed;
       left: 16px;
@@ -119,7 +135,10 @@
       text-transform: uppercase;
       pointer-events: none;
       text-shadow: 0 0 12px rgba(0,0,0,0.55);
+      z-index: 50;
+      transition: transform 100ms linear, opacity 100ms linear;
     }
+
     #goalText {
       position: fixed;
       left: 16px;
@@ -130,15 +149,20 @@
       text-transform: uppercase;
       pointer-events: none;
       text-shadow: 0 0 12px rgba(0,0,0,0.55);
+      z-index: 50;
+      transition: transform 100ms linear, opacity 100ms linear;
     }
+
     #goalText.warning {
       color: #ffff00;
       animation: goalWarning 0.5s infinite;
     }
+
     @keyframes goalWarning {
       0%, 100% { color: #ffff00; }
       50% { color: #ff6464; }
     }
+
     #inventoryUI {
       position: fixed;
       right: 16px;
@@ -149,7 +173,9 @@
       pointer-events: auto;
       text-shadow: 0 0 12px rgba(0,0,0,0.55);
       z-index: 100;
+      max-width: 240px;
     }
+
     .inventory-item {
       padding: 10px 14px;
       border: 1px solid rgba(255,255,255,0.2);
@@ -159,43 +185,53 @@
       cursor: pointer;
       transition: all 200ms ease;
     }
+
     .inventory-item:hover:not(.disabled) {
       border-color: rgba(255,255,255,0.4);
       background: rgba(4, 4, 6, 0.6);
       box-shadow: 0 0 10px rgba(255,100,100,0.3);
     }
+
     .inventory-item.disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
+
     .inventory-item.golden {
       border-color: #ffdd00;
       background: rgba(255, 221, 0, 0.1);
       box-shadow: 0 0 15px rgba(255, 221, 0, 0.5);
     }
+
     .inventory-item.golden:hover {
       box-shadow: 0 0 25px rgba(255, 221, 0, 0.8);
     }
+
     .item-name {
       font-weight: bold;
       color: #ff6464;
     }
+
     .item-name.golden {
       color: #ffdd00;
     }
+
     .item-status {
       font-size: 11px;
       color: rgba(232,232,234,0.6);
       margin-top: 4px;
     }
+
     .item-status.ready {
       color: #64ff64;
       font-weight: bold;
     }
+
     .item-status.golden {
       color: #ffdd00;
       font-weight: bold;
     }
+
     #runText {
       position: fixed;
       width: 100vw;
@@ -205,26 +241,29 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 120px;
+      font-size: clamp(72px, 12vw, 120px);
       font-weight: bold;
       letter-spacing: 0.3em;
       color: #ff4444;
-      text-shadow: 
+      text-shadow:
         0 0 20px rgba(255, 68, 68, 0.8),
         0 0 40px rgba(255, 68, 68, 0.5),
         0 0 60px rgba(255, 0, 0, 0.3);
       pointer-events: none;
       opacity: 0;
-      transition: opacity 100ms ease;
+      transition: opacity 100ms ease, transform 100ms ease;
       z-index: 99;
     }
+
     #runText.active {
-      animation: runPulse 0.6s infinite;
+      animation: runPulse 0.55s infinite;
     }
+
     @keyframes runPulse {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.9; }
+      0%, 100% { opacity: 0.25; transform: scale(1); }
+      50% { opacity: 0.95; transform: scale(1.02); }
     }
+
     #gameOverScreen {
       position: fixed;
       inset: 0;
@@ -235,9 +274,11 @@
       z-index: 1000;
       pointer-events: auto;
     }
+
     #gameOverScreen.show {
       display: flex;
     }
+
     .game-over-panel {
       text-align: center;
       color: #ff4444;
@@ -248,12 +289,14 @@
       max-width: 500px;
       box-shadow: 0 0 60px rgba(255, 0, 0, 0.4);
     }
+
     .game-over-panel.victory {
       color: #ffdd00;
       border-color: #ffdd00;
       background: rgba(50, 50, 0, 0.8);
       box-shadow: 0 0 60px rgba(255, 221, 0, 0.4);
     }
+
     .game-over-title {
       font-size: 48px;
       font-weight: bold;
@@ -262,14 +305,17 @@
       text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
       animation: glitch 0.3s infinite;
     }
+
     .game-over-title.victory {
       text-shadow: 0 0 20px rgba(255, 221, 0, 0.8);
       color: #ffdd00;
     }
+
     @keyframes glitch {
       0%, 100% { text-shadow: 0 0 20px rgba(255, 68, 68, 0.8); }
       50% { text-shadow: 0 0 10px rgba(255, 0, 0, 0.5), 2px 2px 0 rgba(255, 68, 68, 0.6); }
     }
+
     .game-over-stats {
       font-size: 16px;
       color: rgba(255, 100, 100, 0.9);
@@ -277,9 +323,11 @@
       line-height: 1.8;
       letter-spacing: 0.1em;
     }
+
     .game-over-stats.victory {
       color: rgba(255, 221, 0, 0.9);
     }
+
     .game-over-button {
       margin-top: 30px;
       padding: 12px 30px;
@@ -293,19 +341,23 @@
       transition: all 200ms ease;
       text-transform: uppercase;
     }
+
     .game-over-button.victory {
       border-color: #ffdd00;
       background: rgba(255, 221, 0, 0.2);
       color: #ffdd00;
     }
+
     .game-over-button:hover {
       background: rgba(255, 68, 68, 0.4);
       box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
     }
+
     .game-over-button.victory:hover {
       background: rgba(255, 221, 0, 0.4);
       box-shadow: 0 0 20px rgba(255, 221, 0, 0.5);
     }
+
     #blackoutScreen {
       position: fixed;
       inset: 0;
@@ -315,8 +367,42 @@
       pointer-events: none;
       transition: opacity 2s ease;
     }
+
     #blackoutScreen.active {
       opacity: 1;
+    }
+
+    #flashOverlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(circle at center,
+        rgba(255, 0, 0, 0.22) 0%,
+        rgba(255, 0, 0, 0.08) 28%,
+        rgba(0, 0, 0, 0) 62%);
+      mix-blend-mode: screen;
+      transition: opacity 90ms linear;
+      z-index: 998;
+    }
+
+    #flashOverlay.active {
+      opacity: 1;
+    }
+
+    @keyframes uiJitter {
+      0%, 100% { transform: translate(0, 0); }
+      20% { transform: translate(-1px, 0); }
+      40% { transform: translate(1px, -1px); }
+      60% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, 0); }
+    }
+
+    #ui.glitch .panel,
+    #goalText.warning,
+    #timerText,
+    #runText.active {
+      animation: uiJitter 180ms infinite;
     }
   </style>
 </head>
@@ -324,22 +410,37 @@
   <canvas id="renderCanvas"></canvas>
   <canvas id="noiseCanvas"></canvas>
   <canvas id="redNoiseCanvas"></canvas>
+  <div id="flashOverlay"></div>
+
+  <!-- Audio placeholders -->
+  <audio id="ambienceAudio" src="audio/ambience.mp3" loop preload="auto"></audio>
+  <audio id="heartbeatAudio" src="audio/heartbeat.mp3" loop preload="auto"></audio>
+  <audio id="whispersAudio" src="audio/whispers.mp3" preload="auto"></audio>
+  <audio id="chaseAudio" src="audio/chase.mp3" loop preload="auto"></audio>
+  <audio id="jumpAudio" src="audio/jumpscare.mp3" preload="auto"></audio>
+  <audio id="humAudio" src="audio/hum.mp3" loop preload="auto"></audio>
+
   <div id="vignette"></div>
   <div id="scanlines"></div>
+
   <div id="ui">
     <div class="panel">
       <div class="title">RISPERIDONE - The Red Static</div>
       <div class="sub" id="subtitle">Click to lock the cursor and enter.</div>
-      <div class="meta">WASD to move • Mouse to look • V to sprint �� E to use medicine</div>
+      <div class="meta">WASD to move • Mouse to look • V to sprint • E to use medicine</div>
     </div>
   </div>
+
   <div id="timerText">00:00</div>
   <div id="goalText">GOAL: SURVIVE 2 AND A HALF MINUTES</div>
+
   <div id="inventoryUI">
     <div id="inventoryItems"></div>
   </div>
+
   <div id="runText">RUN</div>
   <div id="blackoutScreen"></div>
+
   <div id="gameOverScreen">
     <div class="game-over-panel">
       <div class="game-over-title">They dragged you to Hell</div>
@@ -353,7 +454,6 @@
 
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script>
-
 const canvas = document.getElementById("renderCanvas");
 const noiseCanvas = document.getElementById("noiseCanvas");
 const noiseCtx = noiseCanvas.getContext("2d");
@@ -372,11 +472,59 @@ const finalTimeText = document.getElementById("finalTime");
 const inventoryUI = document.getElementById("inventoryItems");
 const blackoutScreen = document.getElementById("blackoutScreen");
 const gameOverButton = gameOverPanel.querySelector('.game-over-button');
+const flashOverlay = document.getElementById("flashOverlay");
 
-const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, adaptToDeviceRatio: true });
+const audio = {
+  ambience: document.getElementById("ambienceAudio"),
+  heartbeat: document.getElementById("heartbeatAudio"),
+  whispers: document.getElementById("whispersAudio"),
+  chase: document.getElementById("chaseAudio"),
+  jump: document.getElementById("jumpAudio"),
+  hum: document.getElementById("humAudio"),
+};
+
+let audioStarted = false;
+let lastWhisperTime = 0;
+let lastFlashTime = 0;
+let lastSubChange = 0;
+
+function startAudio() {
+  if (audioStarted) return;
+  audioStarted = true;
+
+  audio.ambience.volume = 0.28;
+  audio.hum.volume = 0.05;
+  audio.heartbeat.volume = 0;
+  audio.chase.volume = 0;
+  audio.whispers.volume = 0;
+
+  audio.ambience.play().catch(() => {});
+  audio.hum.play().catch(() => {});
+}
+
+function flashRed(strength = 1) {
+  flashOverlay.classList.add("active");
+  flashOverlay.style.opacity = String(Math.min(0.35, 0.08 + strength * 0.18));
+  setTimeout(() => {
+    flashOverlay.classList.remove("active");
+    flashOverlay.style.opacity = "0";
+  }, 85);
+}
+
+function clamp01(v) {
+  return Math.max(0, Math.min(1, v));
+}
+
+const engine = new BABYLON.Engine(canvas, true, {
+  preserveDrawingBuffer: true,
+  stencil: true,
+  adaptToDeviceRatio: true
+});
+
 function resizeOverlays() {
   engine.resize();
 }
+
 window.addEventListener("resize", resizeOverlays);
 
 const scene = new BABYLON.Scene(engine);
@@ -417,7 +565,6 @@ const CELL_SIZE = 12;
 const CHUNK_CELLS = 8;
 const WALL_THICK = 0.55;
 const WALL_H = 3.5;
-const HALF_CELL = CELL_SIZE * 0.5;
 const CHUNK_WORLD = CELL_SIZE * CHUNK_CELLS;
 const RENDER_RADIUS = 3;
 
@@ -438,10 +585,10 @@ const sprintCooldown = 3000;
 let sprintActive = false;
 let lastSprintTime = 0;
 
-// Goal system - 5 minutes = 300000 ms
+// Goal system
 const GOAL_TIME = 150000;
-const HALLUCINATION_CYCLE = 60000; // 30s on, 30s off
-const HALLUCINATION_ON_DURATION = 30000; // 30 seconds
+const HALLUCINATION_CYCLE = 60000;
+const HALLUCINATION_ON_DURATION = 30000;
 let hasVictoryMed = false;
 
 // Inventory system
@@ -465,13 +612,13 @@ function updateInventoryUI() {
   inventoryUI.innerHTML = '';
   for (const [key, item] of Object.entries(inventory)) {
     if (key === 'victoryMed' && !hasVictoryMed) continue;
-    
+
     const timeSinceLastUse = performance.now() - item.lastUsed;
     const isOnCooldown = timeSinceLastUse < item.cooldown;
-    
+
     const itemDiv = document.createElement('div');
     itemDiv.className = `inventory-item ${isOnCooldown ? 'disabled' : ''} ${item.isGolden ? 'golden' : ''}`;
-    
+
     let statusText = '';
     if (key === 'victoryMed') {
       statusText = 'Press E to ascend';
@@ -481,19 +628,19 @@ function updateInventoryUI() {
     } else {
       statusText = 'Press E to use';
     }
-    
+
     itemDiv.innerHTML = `
       <div class="item-name ${item.isGolden ? 'golden' : ''}">${item.name}</div>
       <div class="item-status ${!isOnCooldown ? 'ready' : ''} ${item.isGolden ? 'golden' : ''}">
         ${statusText}
       </div>
     `;
-    
+
     if (!isOnCooldown) {
       itemDiv.style.cursor = 'pointer';
       itemDiv.addEventListener('click', () => useItem(key));
     }
-    
+
     inventoryUI.appendChild(itemDiv);
   }
 }
@@ -503,23 +650,33 @@ function useItem(itemKey) {
     triggerVictory();
     return;
   }
-  
+
   const item = inventory[itemKey];
-  
   const timeSinceLastUse = performance.now() - item.lastUsed;
   if (timeSinceLastUse < item.cooldown) return;
-  
+
   if (itemKey === 'risperidone') {
     item.lastUsed = performance.now();
-    
+
     for (const monster of monsters) {
       monster.mesh.dispose(true);
     }
     monsters.length = 0;
-    
+
     runText.classList.remove('active');
     runText.style.opacity = '0';
-    
+    subtitle.textContent = "The whispers fade.";
+
+    if (!audio.heartbeat.paused) {
+      audio.heartbeat.pause();
+      audio.heartbeat.currentTime = 0;
+    }
+    if (!audio.chase.paused) {
+      audio.chase.pause();
+      audio.chase.currentTime = 0;
+    }
+
+    flashRed(0.4);
     updateInventoryUI();
   }
 }
@@ -621,7 +778,7 @@ function createStaticTexture(name, size = 64, isRed = false) {
   const ctx = tex.getContext();
   const imgData = ctx.createImageData(size, size);
   const data = imgData.data;
-  
+
   for (let i = 0; i < data.length; i += 4) {
     const rand = Math.random();
     if (isRed) {
@@ -635,25 +792,26 @@ function createStaticTexture(name, size = 64, isRed = false) {
     }
     data[i + 3] = 255;
   }
+
   ctx.putImageData(imgData, 0, 0);
   tex.update();
   return tex;
 }
 
-function createMonster(x, z, hallucination) {
+function createMonster(x, z) {
   const cloudMat = new BABYLON.StandardMaterial(`monsterMat_${Math.random()}`, scene);
   const staticTex = createStaticTexture(`staticTex_${Math.random()}`, 128, true);
   cloudMat.diffuseTexture = staticTex;
   cloudMat.emissiveColor = new BABYLON.Color3(0.6, 0.1, 0.1);
   cloudMat.specularColor = new BABYLON.Color3(0, 0, 0);
-  
+
   const monster = BABYLON.MeshBuilder.CreateSphere(`monster_${x}_${z}`, { diameter: 3, segments: 8 }, scene);
   monster.position.x = x;
   monster.position.y = 3;
   monster.position.z = z;
   monster.material = cloudMat;
   monster.isVisible = true;
-  
+
   const auraRings = [];
   for (let i = 0; i < 3; i++) {
     const auraMat = new BABYLON.StandardMaterial(`auraMat_${Math.random()}`, scene);
@@ -661,7 +819,7 @@ function createMonster(x, z, hallucination) {
     auraMat.diffuseTexture = auraStaticTex;
     auraMat.emissiveColor = new BABYLON.Color3(0.8, 0.15, 0.15);
     auraMat.wireframe = false;
-    
+
     const aura = BABYLON.MeshBuilder.CreateBox(
       `aura_${x}_${z}_${i}`,
       { size: 4 + i * 2 },
@@ -673,7 +831,7 @@ function createMonster(x, z, hallucination) {
     aura.isVisible = true;
     auraRings.push(aura);
   }
-  
+
   return {
     mesh: monster,
     auras: auraRings,
@@ -708,7 +866,6 @@ function createChunk(cx, cz) {
   floor.parent = root;
 
   createMergedWallsForChunk(cx, cz, root);
-
   chunks.set(makeKey(cx, cz), { root });
 }
 
@@ -744,24 +901,23 @@ function updateChunksAroundPlayer() {
 }
 
 function updateMonsters(isHallucinationActive) {
-  // Only spawn monsters during hallucination periods, max 3
-  if (isHallucinationActive && monsters.length < 3) {
+  if (isHallucinationActive && monsters.length < 4 && Math.random() < 0.06) {
     const angle = Math.random() * Math.PI * 2;
     const distance = 25 + Math.random() * 35;
     const mx = camera.position.x + Math.cos(angle) * distance;
     const mz = camera.position.z + Math.sin(angle) * distance;
-    monsters.push(createMonster(mx, mz, 1));
+    monsters.push(createMonster(mx, mz));
   }
 
   let closestMonsterDist = Infinity;
 
   for (let i = monsters.length - 1; i >= 0; i--) {
     const monster = monsters[i];
-    
+
     const towardsCamX = camera.position.x - monster.mesh.position.x;
     const towardsCamZ = camera.position.z - monster.mesh.position.z;
     const distToPlayer = Math.sqrt(towardsCamX * towardsCamX + towardsCamZ * towardsCamZ);
-    
+
     closestMonsterDist = Math.min(closestMonsterDist, distToPlayer);
 
     if (distToPlayer > 2) {
@@ -769,36 +925,38 @@ function updateMonsters(isHallucinationActive) {
       monster.mesh.position.x += (towardsCamX / distToPlayer) * moveAmount;
       monster.mesh.position.z += (towardsCamZ / distToPlayer) * moveAmount;
     } else {
+      audio.jump.currentTime = 0;
+      audio.jump.play().catch(() => {});
       triggerGameOver();
     }
-    
+
     const shakeIntensity = 0.3 + 0.7;
     monster.mesh.position.x += (Math.random() - 0.5) * shakeIntensity;
     monster.mesh.position.y += (Math.random() - 0.5) * shakeIntensity * 0.5;
     monster.mesh.position.z += (Math.random() - 0.5) * shakeIntensity;
-    
+
     monster.mesh.rotation.x += (Math.random() - 0.5) * 0.3;
     monster.mesh.rotation.y += (Math.random() - 0.5) * 0.3;
     monster.mesh.rotation.z += (Math.random() - 0.5) * 0.3;
-    
+
     for (let j = 0; j < monster.auras.length; j++) {
       const aura = monster.auras[j];
       aura.isVisible = true;
-      
+
       const glitchScale = 0.8 + Math.random() * 0.4;
       aura.scaling = new BABYLON.Vector3(glitchScale, glitchScale, glitchScale);
-      
+
       aura.rotation.x += (Math.random() - 0.5) * 0.25;
       aura.rotation.y += (Math.random() - 0.5) * 0.25;
       aura.rotation.z += (Math.random() - 0.5) * 0.25;
     }
-    
+
     if (Math.random() < 0.4) {
       const ctx = monster.staticTexture.getContext();
       const size = 128;
       const imgData = ctx.createImageData(size, size);
       const data = imgData.data;
-      
+
       for (let k = 0; k < data.length; k += 4) {
         const rand = Math.random();
         data[k] = rand > 0.5 ? 220 : 60;
@@ -809,23 +967,73 @@ function updateMonsters(isHallucinationActive) {
       ctx.putImageData(imgData, 0, 0);
       monster.staticTexture.update();
     }
-    
+
     monster.mesh.isVisible = true;
   }
 
-  // Remove monsters when hallucination ends
   if (!isHallucinationActive) {
     for (let i = monsters.length - 1; i >= 0; i--) {
       monsters[i].mesh.dispose(true);
       monsters.splice(i, 1);
     }
     runText.style.opacity = '0';
+    if (!audio.chase.paused) {
+      audio.chase.pause();
+      audio.chase.currentTime = 0;
+    }
   } else if (closestMonsterDist < 20 && monsters.length > 0) {
     runText.classList.add('active');
     runText.style.opacity = '1';
   } else {
     runText.classList.remove('active');
     runText.style.opacity = '0';
+  }
+
+  return closestMonsterDist;
+}
+
+function applyFearFX(closestMonsterDist, hallucination, now) {
+  const fear = clamp01(1 - closestMonsterDist / 40);
+
+  const shake = (fear * 10) + (hallucination * 4);
+  const x = (Math.random() - 0.5) * shake;
+  const y = (Math.random() - 0.5) * shake;
+
+  canvas.style.transform = `translate(${x}px, ${y}px)`;
+  noiseCanvas.style.transform = `translate(${x * 0.35}px, ${y * 0.35}px)`;
+  redNoiseCanvas.style.transform = `translate(${x * 0.5}px, ${y * 0.5}px)`;
+
+  camera.fov = 0.8 + fear * 0.08 + hallucination * 0.03;
+
+  audio.ambience.volume = 0.18 + hallucination * 0.12;
+  audio.hum.volume = 0.04 + hallucination * 0.12;
+
+  audio.heartbeat.volume = fear * 0.65;
+  if (fear > 0.03 && audio.heartbeat.paused) audio.heartbeat.play().catch(() => {});
+  if (fear <= 0.02 && !audio.heartbeat.paused) {
+    audio.heartbeat.pause();
+    audio.heartbeat.currentTime = 0;
+  }
+
+  audio.chase.volume = fear * 0.55;
+  if (fear > 0.45 && audio.chase.paused) audio.chase.play().catch(() => {});
+  if (fear <= 0.35 && !audio.chase.paused) {
+    audio.chase.pause();
+    audio.chase.currentTime = 0;
+  }
+
+  if (hallucination > 0.5 && now - lastWhisperTime > 3500 + Math.random() * 4000) {
+    lastWhisperTime = now;
+    audio.whispers.currentTime = 0;
+    audio.whispers.volume = 0.06 + Math.random() * 0.12;
+    audio.whispers.play().catch(() => {});
+  }
+
+  if (closestMonsterDist < 8 && now - lastFlashTime > 900) {
+    lastFlashTime = now;
+    flashRed(1);
+    document.getElementById("ui").classList.add("glitch");
+    setTimeout(() => document.getElementById("ui").classList.remove("glitch"), 200);
   }
 }
 
@@ -927,11 +1135,11 @@ function triggerGameOver() {
   if (gameOver || gameWon) return;
   gameOver = true;
   engine.stopRenderLoop();
-  
+
   const elapsed = performance.now() - startTime;
   const minutes = Math.floor(elapsed / 60000);
   const seconds = Math.floor((elapsed % 60000) / 1000);
-  
+
   finalTimeText.textContent = `Time Survived: ${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   gameOverScreen.classList.add('show');
 }
@@ -940,30 +1148,24 @@ function triggerVictory() {
   if (gameOver || gameWon) return;
   gameWon = true;
   engine.stopRenderLoop();
-  
-  // Blackout effect
   blackoutScreen.classList.add('active');
-  
+
   setTimeout(() => {
-    // Change scene to white platform
     scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
-    
-    // Clear everything
-    scene.meshes.forEach(mesh => {
+
+    scene.meshes.slice().forEach(mesh => {
       if (mesh.name !== 'skyBox') {
         mesh.dispose();
       }
     });
-    
-    // Create white platform
+
     const platform = BABYLON.MeshBuilder.CreateBox("platform", { size: 50 }, scene);
     platform.position.y = -10;
     const platformMat = new BABYLON.StandardMaterial("platformMat", scene);
     platformMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
     platformMat.emissiveColor = new BABYLON.Color3(0.9, 0.9, 0.9);
     platform.material = platformMat;
-    
-    // Create divine entity
+
     const entity = BABYLON.MeshBuilder.CreateSphere("divineEntity", { diameter: 3, segments: 32 }, scene);
     entity.position.y = 2;
     entity.position.z = 10;
@@ -971,24 +1173,22 @@ function triggerVictory() {
     entityMat.emissiveColor = new BABYLON.Color3(1, 0.84, 0);
     entityMat.diffuseColor = new BABYLON.Color3(1, 0.84, 0);
     entity.material = entityMat;
-    
-    // Gentle animation
+
     let animTime = 0;
     const animRender = () => {
       animTime += 0.016;
       entity.position.y = 2 + Math.sin(animTime * 0.5) * 0.3;
       entity.rotation.y += 0.01;
     };
-    
+
     engine.runRenderLoop(() => {
       animRender();
       scene.render();
     });
-    
+
     setTimeout(() => {
       engine.stopRenderLoop();
-      
-      // Show victory screen
+
       gameOverPanel.classList.add('victory');
       gameOverTitle.classList.add('victory');
       gameOverTitle.textContent = 'The God saved you.';
@@ -1001,6 +1201,23 @@ function triggerVictory() {
   }, 2000);
 }
 
+function randomSubtitle(now) {
+  if (now - lastSubChange < 5000) return;
+  lastSubChange = now;
+
+  const lines = [
+    "The static is getting louder.",
+    "Do not look behind you.",
+    "Something is moving in the fog.",
+    "The walls are listening.",
+    "You are not alone.",
+    "The hallucinations are beginning.",
+    "The red light means it sees you.",
+    "Run before it notices."
+  ];
+  subtitle.textContent = lines[Math.floor(Math.random() * lines.length)];
+}
+
 window.addEventListener("resize", () => {
   resizeOverlays();
   resizeNoiseCanvas();
@@ -1008,20 +1225,22 @@ window.addEventListener("resize", () => {
 
 window.addEventListener("keydown", (e) => {
   if (gameOver || gameWon) return;
-  
+
   if (e.code === "KeyV") {
     if (!sprintActive && performance.now() - lastSprintTime > sprintCooldown) {
       sprintActive = true;
       lastSprintTime = performance.now();
       camera.speed = 2.4;
+      document.getElementById("ui").classList.add("glitch");
       setTimeout(() => {
         sprintActive = false;
         camera.speed = 1.2;
+        document.getElementById("ui").classList.remove("glitch");
       }, sprintDuration);
     }
     e.preventDefault();
   }
-  
+
   if (e.code === "KeyE") {
     if (hasVictoryMed) {
       useItem('victoryMed');
@@ -1033,6 +1252,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 scene.onPointerDown = () => {
+  startAudio();
   if (document.pointerLockElement !== canvas) {
     canvas.requestPointerLock();
   }
@@ -1052,25 +1272,22 @@ updateInventoryUI();
 
 engine.runRenderLoop(() => {
   if (gameOver || gameWon) return;
-  
+
   const now = performance.now();
   const elapsed = now - startTime;
-  
-  // Check if goal reached (5 minutes)
+
   if (elapsed >= GOAL_TIME && !hasVictoryMed) {
     hasVictoryMed = true;
     updateInventoryUI();
     goalText.textContent = '*** FINAL REMEDY ACQUIRED ***';
     goalText.classList.add('warning');
+    flashRed(0.8);
   }
-  
-  // Hallucination cycle system
+
   const cyclePosition = (elapsed - 30000) % HALLUCINATION_CYCLE;
   const isHallucinationActive = elapsed >= 30000 && cyclePosition < HALLUCINATION_ON_DURATION;
-  
-  // Only update hallucination effects after 30 seconds
   const hallucination = elapsed >= 30000 ? (isHallucinationActive ? 1 : 0) : 0;
-  
+
   const flicker = Math.max(0, Math.sin(now * 0.008) * 0.25 + Math.sin(now * 0.021) * 0.15);
   const pulse = hallucination > 0.5 ? (flicker * hallucination) : 0;
 
@@ -1081,12 +1298,27 @@ engine.runRenderLoop(() => {
   if (hallucination > 0.5 && Math.random() < 0.06) {
     drawStaticToTexture(hallucination);
   }
+
   drawOverlayNoise(pulse, now);
   drawRedNoise(hallucination, now);
 
-  updateMonsters(isHallucinationActive);
+  const closestMonsterDist = updateMonsters(isHallucinationActive);
+  applyFearFX(closestMonsterDist, hallucination, now);
 
-  // Update inventory UI every 100ms
+  if (hallucination > 0.5 && Math.random() < 0.02) {
+    flashRed(0.6);
+  }
+
+  if (hallucination > 0.5 && Math.random() < 0.01) {
+    subtitle.textContent = [
+      "It knows where you are.",
+      "The walls are listening.",
+      "Do not trust the red static."
+    ][Math.floor(Math.random() * 3)];
+  }
+
+  randomSubtitle(now);
+
   if (now - lastInventoryUpdate > 100) {
     updateInventoryUI();
     lastInventoryUpdate = now;
@@ -1097,12 +1329,12 @@ engine.runRenderLoop(() => {
 
   const camChunkX = Math.floor(camera.position.x / CHUNK_WORLD);
   const camChunkZ = Math.floor(camera.position.z / CHUNK_WORLD);
+
   if (now - lastChunkUpdate > 250) {
     updateChunksAroundPlayer();
     lastChunkUpdate = now;
   }
 
-  // Update goal text color as you approach 5 minutes
   const timeToGoal = GOAL_TIME - elapsed;
   if (timeToGoal > 0 && timeToGoal < 60000) {
     goalText.classList.add('warning');
@@ -1119,7 +1351,6 @@ engine.runRenderLoop(() => {
   skyBox.rotation.y += 0.0004;
   scene.render();
 });
-
   </script>
 </body>
 </html>
