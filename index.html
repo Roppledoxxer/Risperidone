@@ -328,7 +328,7 @@
   <div id="scanlines"></div>
   <div id="ui">
     <div class="panel">
-      <div class="title">Infinite Static Maze</div>
+      <div class="title">RISPERIDONE - The Red Static</div>
       <div class="sub" id="subtitle">Click to lock the cursor and enter.</div>
       <div class="meta">WASD to move • Mouse to look • V to sprint �� E to use medicine</div>
     </div>
@@ -342,9 +342,9 @@
   <div id="blackoutScreen"></div>
   <div id="gameOverScreen">
     <div class="game-over-panel">
-      <div class="game-over-title">GAME OVER</div>
+      <div class="game-over-title">They dragged you to Hell</div>
       <div class="game-over-stats" id="gameOverStats">
-        You were caught by the hallucinations.<br>
+        The Death Angels brought your soul for the blood of theirs.<br>
         <span id="finalTime">Time: 00:00</span>
       </div>
       <button class="game-over-button" onclick="location.reload()">RESTART</button>
@@ -991,9 +991,9 @@ function triggerVictory() {
       // Show victory screen
       gameOverPanel.classList.add('victory');
       gameOverTitle.classList.add('victory');
-      gameOverTitle.textContent = 'YOU WIN';
+      gameOverTitle.textContent = 'The God saved you.';
       gameOverStats.classList.add('victory');
-      gameOverStats.innerHTML = 'You have transcended the hallucinations.<br>The infinite static has released you.';
+      gameOverStats.innerHTML = 'You have transcended the Death Angels.<br>Their static released you.';
       gameOverButton.classList.add('victory');
       gameOverScreen.classList.add('show');
       blackoutScreen.classList.remove('active');
