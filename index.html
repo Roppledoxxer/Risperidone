@@ -404,6 +404,286 @@
     #runText.active {
       animation: uiJitter 180ms infinite;
     }
+
+    /* ============= CINEMATIC STYLES ============= */
+    #cinematicScreen {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: none;
+      z-index: 2000;
+      pointer-events: auto;
+    }
+
+    #cinematicScreen.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cinematic-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+    }
+
+    .cinematic-text {
+      font-size: 28px;
+      max-width: 90%;
+      line-height: 1.6;
+      text-shadow: 0 0 20px rgba(0,0,0,0.8);
+      animation: fadeInText 1s ease-in-out;
+      letter-spacing: 0.05em;
+      margin-bottom: 30px;
+    }
+
+    .cinematic-subtext {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      animation: fadeInText 1.5s ease-in-out;
+    }
+
+    @keyframes fadeInText {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ============= JUMPSCARE STYLES ============= */
+    #jumpscareOverlay {
+      position: fixed;
+      inset: 0;
+      background: #ff0000;
+      display: none;
+      z-index: 1500;
+      pointer-events: none;
+      opacity: 0;
+      animation: jumpscareFlash 0.15s ease-out;
+    }
+
+    #jumpscareOverlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    @keyframes jumpscareFlash {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .jumpscare-entity {
+      position: fixed;
+      font-size: 180px;
+      font-weight: bold;
+      color: #ff0000;
+      text-shadow: 0 0 40px rgba(255,0,0,0.8);
+      z-index: 1499;
+      pointer-events: none;
+      animation: jumpscareAppear 0.2s ease-out;
+    }
+
+    @keyframes jumpscareAppear {
+      0% { opacity: 0; transform: scale(0.3) rotate(15deg); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1) rotate(0deg); }
+    }
+
+    /* ============= STORY ELEMENTS ============= */
+    #storyLog {
+      position: fixed;
+      bottom: 100px;
+      left: 16px;
+      max-width: 300px;
+      font-size: 11px;
+      color: rgba(232,232,234,0.6);
+      text-shadow: 0 0 8px rgba(0,0,0,0.7);
+      pointer-events: none;
+      z-index: 45;
+      max-height: 150px;
+      overflow-y: auto;
+      background: rgba(4,4,6,0.3);
+      padding: 8px;
+      border-radius: 4px;
+      border-left: 2px solid rgba(255,100,100,0.4);
+    }
+
+    .story-entry {
+      margin-bottom: 8px;
+      line-height: 1.4;
+      animation: slideInStory 0.5s ease-out;
+    }
+
+    @keyframes slideInStory {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ============= GLITCH EFFECTS ============= */
+    #glitchOverlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255,0,0,0.3) 0%,
+        transparent 50%,
+        rgba(0,255,255,0.3) 100%
+      );
+      mix-blend-mode: overlay;
+      z-index: 997;
+      transition: opacity 100ms linear;
+    }
+
+    #glitchOverlay.active {
+      animation: glitchWave 0.2s ease-out;
+      opacity: 1;
+    }
+
+    @keyframes glitchWave {
+      0%, 100% { opacity: 1; transform: translateX(0); }
+      25% { opacity: 0.8; transform: translateX(-10px); }
+      50% { opacity: 0.6; transform: translateX(10px); }
+      75% { opacity: 0.8; transform: translateX(-5px); }
+    }
+
+    /* ============= MEMORY FRAGMENTS ============= */
+    .memory-fragment {
+      position: fixed;
+      background: rgba(255,100,100,0.15);
+      border: 1px solid rgba(255,100,100,0.4);
+      border-radius: 4px;
+      padding: 12px;
+      max-width: 200px;
+      font-size: 11px;
+      color: rgba(255,200,200,0.8);
+      z-index: 45;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: all 300ms ease;
+    }
+
+    .memory-fragment:hover {
+      background: rgba(255,100,100,0.25);
+      border-color: rgba(255,100,100,0.7);
+      box-shadow: 0 0 15px rgba(255,100,100,0.3);
+    }
+
+    .memory-fragment.revealed {
+      background: rgba(100,255,100,0.15);
+      border-color: rgba(100,255,100,0.4);
+      color: rgba(100,255,100,0.9);
+    }
+
+    /* ============= NPC DIALOGUE ============= */
+    #dialogueBox {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(4,4,6,0.9);
+      border: 2px solid rgba(255,100,100,0.5);
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 600px;
+      color: rgba(255,200,200,0.9);
+      font-size: 13px;
+      line-height: 1.6;
+      z-index: 200;
+      display: none;
+      pointer-events: auto;
+      text-shadow: 0 0 10px rgba(0,0,0,0.5);
+      animation: slideUpDialogue 0.4s ease-out;
+    }
+
+    #dialogueBox.active {
+      display: block;
+    }
+
+    @keyframes slideUpDialogue {
+      from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    .dialogue-speaker {
+      font-weight: bold;
+      color: #ffaaaa;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .dialogue-text {
+      color: rgba(255,200,200,0.9);
+    }
+
+    /* ============= CHOICE SYSTEM ============= */
+    #choicePanel {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      z-index: 1800;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      flex-direction: column;
+    }
+
+    #choicePanel.active {
+      display: flex;
+    }
+
+    .choice-container {
+      max-width: 500px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .choice-title {
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #ffdd00;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+    }
+
+    .choice-button {
+      display: block;
+      width: 100%;
+      padding: 15px 20px;
+      margin: 15px 0;
+      border: 2px solid #ff6464;
+      background: rgba(255,100,100,0.1);
+      color: #ff6464;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 300ms ease;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .choice-button:hover {
+      background: rgba(255,100,100,0.3);
+      box-shadow: 0 0 20px rgba(255,100,100,0.5);
+      transform: scale(1.05);
+    }
+
+    .choice-button.virtue {
+      border-color: #64ff64;
+      color: #64ff64;
+      background: rgba(100,255,100,0.1);
+    }
+
+    .choice-button.virtue:hover {
+      background: rgba(100,255,100,0.3);
+      box-shadow: 0 0 20px rgba(100,255,100,0.5);
+    }
   </style>
 </head>
 <body>
@@ -411,6 +691,7 @@
   <canvas id="noiseCanvas"></canvas>
   <canvas id="redNoiseCanvas"></canvas>
   <div id="flashOverlay"></div>
+  <div id="glitchOverlay"></div>
 
   <!-- Audio placeholders -->
   <audio id="ambienceAudio" src="yourugor-tv-static-noise-291374.mp3" loop preload="auto"></audio>
@@ -419,6 +700,8 @@
   <audio id="chaseAudio" src="audio/chase.mp3" loop preload="auto"></audio>
   <audio id="jumpAudio" src="Boom1.wav" preload="auto"></audio>
   <audio id="humAudio" src="Pickup.wav" loop preload="auto"></audio>
+  <audio id="jumpscareAudio" src="audio/jumpscare.mp3" preload="auto"></audio>
+  <audio id="dialogueAudio" src="audio/voice.mp3" preload="auto"></audio>
 
   <div id="vignette"></div>
   <div id="scanlines"></div>
@@ -433,6 +716,7 @@
 
   <div id="timerText">00:00</div>
   <div id="goalText">GOAL: SURVIVE 2 AND A HALF MINUTES</div>
+  <div id="storyLog"></div>
 
   <div id="inventoryUI">
     <div id="inventoryItems"></div>
@@ -440,6 +724,27 @@
 
   <div id="runText">RUN</div>
   <div id="blackoutScreen"></div>
+  <div id="jumpscareOverlay"></div>
+  <div id="glitchOverlay"></div>
+
+  <div id="cinematicScreen">
+    <div class="cinematic-container">
+      <div class="cinematic-text" id="cinematicText">Loading purgatory...</div>
+      <div class="cinematic-subtext" id="cinematicSubtext"></div>
+    </div>
+  </div>
+
+  <div id="dialogueBox">
+    <div class="dialogue-speaker" id="dialogueSpeaker">UNKNOWN</div>
+    <div class="dialogue-text" id="dialogueText">...</div>
+  </div>
+
+  <div id="choicePanel">
+    <div class="choice-container">
+      <div class="choice-title" id="choiceTitle">A Choice Awaits</div>
+      <div id="choicesContainer"></div>
+    </div>
+  </div>
 
   <div id="gameOverScreen">
     <div class="game-over-panel">
@@ -454,6 +759,33 @@
 
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script>
+// ==================== GAME STATE ====================
+const gameState = {
+  gameOver: false,
+  gameWon: false,
+  isSprinting: false,
+  sprintActive: false,
+  lastSprintTime: 0,
+  hasVictoryMed: false,
+  pointerLocked: false,
+  cinematicActive: false,
+  storyProgression: 0,
+  playerSins: [],
+  encounterCount: 0,
+  memoryFragmentsFound: 0,
+  choiceMade: null,
+};
+
+const STORY_BEATS = {
+  AWAKENING: 0,
+  FIRST_ENCOUNTER: 30000,
+  MEMORY_FLASH: 60000,
+  NPC_DIALOGUE: 90000,
+  REALITY_BREAK: 120000,
+  CLIMAX: 140000,
+};
+
+// ==================== DOM ELEMENTS ====================
 const canvas = document.getElementById("renderCanvas");
 const noiseCanvas = document.getElementById("noiseCanvas");
 const noiseCtx = noiseCanvas.getContext("2d");
@@ -473,6 +805,18 @@ const inventoryUI = document.getElementById("inventoryItems");
 const blackoutScreen = document.getElementById("blackoutScreen");
 const gameOverButton = gameOverPanel.querySelector('.game-over-button');
 const flashOverlay = document.getElementById("flashOverlay");
+const cinematicScreen = document.getElementById("cinematicScreen");
+const cinematicText = document.getElementById("cinematicText");
+const cinematicSubtext = document.getElementById("cinematicSubtext");
+const jumpscareOverlay = document.getElementById("jumpscareOverlay");
+const storyLog = document.getElementById("storyLog");
+const dialogueBox = document.getElementById("dialogueBox");
+const dialogueSpeaker = document.getElementById("dialogueSpeaker");
+const dialogueText = document.getElementById("dialogueText");
+const choicePanel = document.getElementById("choicePanel");
+const choicesContainer = document.getElementById("choicesContainer");
+const choiceTitle = document.getElementById("choiceTitle");
+const glitchOverlay = document.getElementById("glitchOverlay");
 
 const audio = {
   ambience: document.getElementById("ambienceAudio"),
@@ -481,8 +825,238 @@ const audio = {
   chase: document.getElementById("chaseAudio"),
   jump: document.getElementById("jumpAudio"),
   hum: document.getElementById("humAudio"),
+  jumpscare: document.getElementById("jumpscareAudio"),
+  dialogue: document.getElementById("dialogueAudio"),
 };
 
+// ==================== STORY SYSTEM ====================
+const storyFragments = [
+  "What is this place?",
+  "You remember... a car swerving.",
+  "The screams. Why do you remember the screams?",
+  "You were not alone in that car.",
+  "They said it was an accident.",
+  "But you were driving.",
+  "Your hands were on the wheel.",
+  "Six people didn't make it.",
+  "You did.",
+  "Was it luck... or something else?",
+];
+
+const npcDialogues = [
+  {
+    name: "THE JUDGE",
+    text: "Welcome to your purgatory. You must face what you've done.",
+    color: "#ffaaaa"
+  },
+  {
+    name: "ECHO OF GUILT",
+    text: "They're still screaming. Can you hear them? In the static?",
+    color: "#ff6464"
+  },
+  {
+    name: "THE WATCHER",
+    text: "Every time you medicate... you run from the truth. But the truth always catches up.",
+    color: "#ff9999"
+  },
+  {
+    name: "LOST SOUL",
+    text: "I was in your car that night. Why did I have to die?",
+    color: "#ffcccc"
+  }
+];
+
+function addStoryEntry(text) {
+  const entry = document.createElement('div');
+  entry.className = 'story-entry';
+  entry.textContent = `> ${text}`;
+  storyLog.appendChild(entry);
+  storyLog.scrollTop = storyLog.scrollHeight;
+  
+  if (storyLog.children.length > 5) {
+    storyLog.children[0].remove();
+  }
+}
+
+function showDialogue(name, text) {
+  dialogueSpeaker.textContent = name;
+  dialogueText.textContent = text;
+  dialogueBox.classList.add('active');
+  
+  audio.dialogue.currentTime = 0;
+  audio.dialogue.play().catch(() => {});
+  
+  setTimeout(() => {
+    dialogueBox.classList.remove('active');
+  }, 4000);
+}
+
+function showCinematic(title, subtitle) {
+  gameState.cinematicActive = true;
+  cinematicScreen.classList.add('active');
+  cinematicText.textContent = title;
+  cinematicSubtext.textContent = subtitle;
+  
+  setTimeout(() => {
+    cinematicScreen.classList.remove('active');
+    gameState.cinematicActive = false;
+  }, 3500);
+}
+
+// ==================== JUMPSCARE SYSTEM ====================
+const jumpscareTypes = [
+  { text: "THEY SEE YOU", color: "#ff0000" },
+  { text: "RUNNING", color: "#ff2222" },
+  { text: "FALL", color: "#dd0000" },
+  { text: "ASCEND", color: "#ff4444" },
+  { text: "SINK", color: "#bb0000" },
+];
+
+function triggerJumpscare() {
+  if (gameState.gameOver || gameState.gameWon || gameState.cinematicActive) return;
+  
+  audio.jumpscare.currentTime = 0;
+  audio.jumpscare.volume = 0.4;
+  audio.jumpscare.play().catch(() => {});
+  
+  jumpscareOverlay.classList.add('active');
+  setTimeout(() => jumpscareOverlay.classList.remove('active'), 150);
+  
+  const jumpscare = jumpscareTypes[Math.floor(Math.random() * jumpscareTypes.length)];
+  const entity = document.createElement('div');
+  entity.className = 'jumpscare-entity';
+  entity.textContent = jumpscare.text;
+  entity.style.color = jumpscare.color;
+  entity.style.left = Math.random() * 80 + 10 + '%';
+  entity.style.top = Math.random() * 60 + 20 + '%';
+  document.body.appendChild(entity);
+  
+  setTimeout(() => entity.remove(), 800);
+  
+  flashRed(1);
+  gameState.encounterCount++;
+  addStoryEntry("Something moved in the static...");
+}
+
+// ==================== CHOICE SYSTEM ====================
+function showChoices(situation) {
+  choicePanel.classList.add('active');
+  
+  const choices = {
+    firstSin: {
+      title: "How do you face your guilt?",
+      options: [
+        { text: "Accept Responsibility", class: "virtue", action: () => {
+          gameState.choiceMade = "accept";
+          addStoryEntry("You accept what you've done.");
+          showDialogue("THE JUDGE", "Your first step toward redemption begins.");
+        }},
+        { text: "Deny Everything", class: "", action: () => {
+          gameState.choiceMade = "deny";
+          addStoryEntry("You push the guilt deeper down.");
+          showDialogue("ECHO OF GUILT", "You cannot hide forever.");
+        }},
+        { text: "Medicate & Forget", class: "", action: () => {
+          gameState.choiceMade = "medicate";
+          addStoryEntry("You reach for the pills again.");
+          showDialogue("THE WATCHER", "Running again, I see.");
+        }}
+      ]
+    },
+    finalChoice: {
+      title: "Your Final Hour Has Come",
+      options: [
+        { text: "Seek Redemption", class: "virtue", action: () => {
+          gameState.choiceMade = "redemption";
+          triggerGoodEnding();
+        }},
+        { text: "Embrace the Static", class: "", action: () => {
+          gameState.choiceMade = "static";
+          triggerBadEnding();
+        }},
+        { text: "Transcend All", class: "", action: () => {
+          gameState.choiceMade = "transcend";
+          triggerNeutralEnding();
+        }}
+      ]
+    }
+  };
+  
+  const choice = choices[situation];
+  choiceTitle.textContent = choice.title;
+  choicesContainer.innerHTML = '';
+  
+  choice.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = `choice-button ${opt.class}`;
+    btn.textContent = opt.text;
+    btn.onclick = () => {
+      choicePanel.classList.remove('active');
+      opt.action();
+    };
+    choicesContainer.appendChild(btn);
+  });
+}
+
+// ==================== CINEMATIC ENDINGS ====================
+function triggerGoodEnding() {
+  gameState.gameWon = true;
+  engine.stopRenderLoop();
+  
+  showCinematic(
+    "THE BURDEN LIFTS",
+    "You have accepted your sins. In that acceptance lies salvation."
+  );
+  
+  setTimeout(() => {
+    gameOverPanel.classList.add('victory');
+    gameOverTitle.classList.add('victory');
+    gameOverTitle.textContent = 'The Weight Has Lifted';
+    gameOverStats.classList.add('victory');
+    gameOverStats.innerHTML = 'You have found redemption in purgatory.<br>The six souls forgive you.<br><span id="finalTime">Time: Well Spent</span>';
+    gameOverButton.classList.add('victory');
+    gameOverScreen.classList.add('show');
+  }, 4000);
+}
+
+function triggerBadEnding() {
+  gameState.gameWon = true;
+  engine.stopRenderLoop();
+  
+  showCinematic(
+    "DESCENDING",
+    "You chose to deny. Denial has become your eternal prison."
+  );
+  
+  setTimeout(() => {
+    gameOverTitle.textContent = 'The Descent';
+    gameOverStats.innerHTML = 'You have refused redemption.<br>The static claims you entirely.<br>Your purgatory becomes permanent.';
+    gameOverScreen.classList.add('show');
+  }, 4000);
+}
+
+function triggerNeutralEnding() {
+  gameState.gameWon = true;
+  engine.stopRenderLoop();
+  
+  showCinematic(
+    "TRANSCENDENCE",
+    "Neither salvation nor damnation. You have become something... else."
+  );
+  
+  setTimeout(() => {
+    gameOverPanel.style.borderColor = '#00ffff';
+    gameOverTitle.textContent = 'Beyond Definition';
+    gameOverTitle.style.color = '#00ffff';
+    gameOverStats.classList.add('victory');
+    gameOverStats.innerHTML = 'You have transcended purgatory itself.<br>But at what cost?<br>What are you now?';
+    gameOverButton.style.borderColor = '#00ffff';
+    gameOverButton.style.color = '#00ffff';
+    gameOverScreen.classList.add('show');
+  }, 4000);
+}
+
+// ==================== AUDIO ====================
 let audioStarted = false;
 let lastWhisperTime = 0;
 let lastFlashTime = 0;
@@ -497,6 +1071,8 @@ function startAudio() {
   audio.heartbeat.volume = 0;
   audio.chase.volume = 0;
   audio.whispers.volume = 0;
+  audio.jumpscare.volume = 0;
+  audio.dialogue.volume = 0.3;
 
   audio.ambience.play().catch(() => {});
   audio.hum.play().catch(() => {});
@@ -511,10 +1087,16 @@ function flashRed(strength = 1) {
   }, 85);
 }
 
+function glitch() {
+  glitchOverlay.classList.add('active');
+  setTimeout(() => glitchOverlay.classList.remove('active'), 200);
+}
+
 function clamp01(v) {
   return Math.max(0, Math.min(1, v));
 }
 
+// ==================== BABYLON SETUP ====================
 const engine = new BABYLON.Engine(canvas, true, {
   preserveDrawingBuffer: true,
   stencil: true,
@@ -576,22 +1158,9 @@ const wallMat = new BABYLON.StandardMaterial("wallMat", scene);
 wallMat.diffuseColor = new BABYLON.Color3(0.52, 0.52, 0.54);
 wallMat.specularColor = new BABYLON.Color3(0.08, 0.08, 0.08);
 
-// Game state
-let gameOver = false;
-let gameWon = false;
-let isSprinting = false;
 const sprintDuration = 5000;
 const sprintCooldown = 3000;
-let sprintActive = false;
-let lastSprintTime = 0;
 
-// Goal system
-const GOAL_TIME = 150000;
-const HALLUCINATION_CYCLE = 60000;
-const HALLUCINATION_ON_DURATION = 30000;
-let hasVictoryMed = false;
-
-// Inventory system
 const inventory = {
   risperidone: {
     name: "Risperidone",
@@ -608,10 +1177,14 @@ const inventory = {
   }
 };
 
+const GOAL_TIME = 150000;
+const HALLUCINATION_CYCLE = 60000;
+const HALLUCINATION_ON_DURATION = 30000;
+
 function updateInventoryUI() {
   inventoryUI.innerHTML = '';
   for (const [key, item] of Object.entries(inventory)) {
-    if (key === 'victoryMed' && !hasVictoryMed) continue;
+    if (key === 'victoryMed' && !gameState.hasVictoryMed) continue;
 
     const timeSinceLastUse = performance.now() - item.lastUsed;
     const isOnCooldown = timeSinceLastUse < item.cooldown;
@@ -647,7 +1220,7 @@ function updateInventoryUI() {
 
 function useItem(itemKey) {
   if (itemKey === 'victoryMed') {
-    triggerVictory();
+    showChoices('finalChoice');
     return;
   }
 
@@ -665,7 +1238,8 @@ function useItem(itemKey) {
 
     runText.classList.remove('active');
     runText.style.opacity = '0';
-    subtitle.textContent = "The whispers fade.";
+    subtitle.textContent = "The whispers fade... temporarily.";
+    addStoryEntry("Medication taken. Clarity returning.");
 
     if (!audio.heartbeat.paused) {
       audio.heartbeat.pause();
@@ -1050,7 +1624,6 @@ skyBox.material = skyMat;
 skyBox.infiniteDistance = true;
 
 const startTime = performance.now();
-let pointerLocked = false;
 let lastChunkUpdate = 0;
 let lastInventoryUpdate = 0;
 
@@ -1132,8 +1705,8 @@ function drawRedNoise(level, t) {
 }
 
 function triggerGameOver() {
-  if (gameOver || gameWon) return;
-  gameOver = true;
+  if (gameState.gameOver || gameState.gameWon) return;
+  gameState.gameOver = true;
   engine.stopRenderLoop();
 
   const elapsed = performance.now() - startTime;
@@ -1144,78 +1717,48 @@ function triggerGameOver() {
   gameOverScreen.classList.add('show');
 }
 
-function triggerVictory() {
-  if (gameOver || gameWon) return;
-  gameWon = true;
-  engine.stopRenderLoop();
-  blackoutScreen.classList.add('active');
+// ==================== STORY PROGRESSION ====================
+function updateStoryProgression(elapsed) {
+  if (elapsed >= STORY_BEATS.AWAKENING && gameState.storyProgression < 1) {
+    gameState.storyProgression = 1;
+    showCinematic("WELCOME TO PURGATORY", "You are here because you chose to be.");
+    addStoryEntry("You awaken in endless corridors of grey.");
+  }
 
-  setTimeout(() => {
-    scene.clearColor = new BABYLON.Color4(1, 1, 1, 1);
+  if (elapsed >= STORY_BEATS.FIRST_ENCOUNTER && gameState.storyProgression < 2 && gameState.encounterCount === 0) {
+    gameState.storyProgression = 2;
+    setTimeout(() => triggerJumpscare(), 500);
+    showDialogue("THE WATCHER", "They know you're here now.");
+  }
 
-    scene.meshes.slice().forEach(mesh => {
-      if (mesh.name !== 'skyBox') {
-        mesh.dispose();
-      }
-    });
+  if (elapsed >= STORY_BEATS.MEMORY_FLASH && gameState.storyProgression < 3) {
+    gameState.storyProgression = 3;
+    showCinematic(
+      storyFragments[Math.floor(Math.random() * storyFragments.length)],
+      "Your past bleeds through the static..."
+    );
+    glitch();
+  }
 
-    const platform = BABYLON.MeshBuilder.CreateBox("platform", { size: 50 }, scene);
-    platform.position.y = -10;
-    const platformMat = new BABYLON.StandardMaterial("platformMat", scene);
-    platformMat.diffuseColor = new BABYLON.Color3(1, 1, 1);
-    platformMat.emissiveColor = new BABYLON.Color3(0.9, 0.9, 0.9);
-    platform.material = platformMat;
+  if (elapsed >= STORY_BEATS.NPC_DIALOGUE && gameState.storyProgression < 4) {
+    gameState.storyProgression = 4;
+    const npc = npcDialogues[Math.floor(Math.random() * npcDialogues.length)];
+    showDialogue(npc.name, npc.text);
+  }
 
-    const entity = BABYLON.MeshBuilder.CreateSphere("divineEntity", { diameter: 3, segments: 32 }, scene);
-    entity.position.y = 2;
-    entity.position.z = 10;
-    const entityMat = new BABYLON.StandardMaterial("entityMat", scene);
-    entityMat.emissiveColor = new BABYLON.Color3(1, 0.84, 0);
-    entityMat.diffuseColor = new BABYLON.Color3(1, 0.84, 0);
-    entity.material = entityMat;
+  if (elapsed >= STORY_BEATS.REALITY_BREAK && gameState.storyProgression < 5) {
+    gameState.storyProgression = 5;
+    showCinematic("REALITY FRACTURES", "The walls are not what you think.");
+    for (let i = 0; i < 3; i++) {
+      setTimeout(() => glitch(), i * 300);
+    }
+  }
 
-    let animTime = 0;
-    const animRender = () => {
-      animTime += 0.016;
-      entity.position.y = 2 + Math.sin(animTime * 0.5) * 0.3;
-      entity.rotation.y += 0.01;
-    };
-
-    engine.runRenderLoop(() => {
-      animRender();
-      scene.render();
-    });
-
-    setTimeout(() => {
-      engine.stopRenderLoop();
-
-      gameOverPanel.classList.add('victory');
-      gameOverTitle.classList.add('victory');
-      gameOverTitle.textContent = 'The God saved you.';
-      gameOverStats.classList.add('victory');
-      gameOverStats.innerHTML = 'You have transcended the Death Angels.<br>Their static released you.';
-      gameOverButton.classList.add('victory');
-      gameOverScreen.classList.add('show');
-      blackoutScreen.classList.remove('active');
-    }, 3000);
-  }, 2000);
-}
-
-function randomSubtitle(now) {
-  if (now - lastSubChange < 5000) return;
-  lastSubChange = now;
-
-  const lines = [
-    "The static is getting louder.",
-    "Do not look behind you.",
-    "Something is moving in the fog.",
-    "The walls are listening.",
-    "You are not alone.",
-    "The hallucinations are beginning.",
-    "The red light means it sees you.",
-    "Run before it notices."
-  ];
-  subtitle.textContent = lines[Math.floor(Math.random() * lines.length)];
+  if (elapsed >= STORY_BEATS.CLIMAX && gameState.storyProgression < 6) {
+    gameState.storyProgression = 6;
+    showCinematic("YOUR FINAL HOUR", "Will you face what you've done?");
+    setTimeout(() => showChoices('firstSin'), 1500);
+  }
 }
 
 window.addEventListener("resize", () => {
@@ -1224,16 +1767,17 @@ window.addEventListener("resize", () => {
 });
 
 window.addEventListener("keydown", (e) => {
-  if (gameOver || gameWon) return;
+  if (gameState.gameOver || gameState.gameWon || gameState.cinematicActive) return;
 
   if (e.code === "KeyV") {
-    if (!sprintActive && performance.now() - lastSprintTime > sprintCooldown) {
-      sprintActive = true;
-      lastSprintTime = performance.now();
+    if (!gameState.sprintActive && performance.now() - gameState.lastSprintTime > sprintCooldown) {
+      gameState.sprintActive = true;
+      gameState.lastSprintTime = performance.now();
       camera.speed = 2.4;
       document.getElementById("ui").classList.add("glitch");
+      addStoryEntry("You run. Your heart races with your feet.");
       setTimeout(() => {
-        sprintActive = false;
+        gameState.sprintActive = false;
         camera.speed = 1.2;
         document.getElementById("ui").classList.remove("glitch");
       }, sprintDuration);
@@ -1242,12 +1786,16 @@ window.addEventListener("keydown", (e) => {
   }
 
   if (e.code === "KeyE") {
-    if (hasVictoryMed) {
+    if (gameState.hasVictoryMed) {
       useItem('victoryMed');
     } else {
       useItem('risperidone');
     }
     e.preventDefault();
+  }
+
+  if (e.code === "KeyL") {
+    triggerJumpscare();
   }
 });
 
@@ -1259,9 +1807,14 @@ scene.onPointerDown = () => {
 };
 
 document.addEventListener("pointerlockchange", () => {
-  pointerLocked = document.pointerLockElement === canvas;
-  ui.classList.toggle("hidden", pointerLocked);
-  subtitle.textContent = pointerLocked ? "You are inside." : "Click to lock the cursor and enter.";
+  gameState.pointerLocked = document.pointerLockElement === canvas;
+  ui.classList.toggle("hidden", gameState.pointerLocked);
+  subtitle.textContent = gameState.pointerLocked ? "You are inside." : "Click to lock the cursor and enter.";
+  
+  if (gameState.pointerLocked) {
+    showCinematic("ENTERING THE LABYRINTH", "There is no escape now.");
+    addStoryEntry("The cursor locks. Your fate is sealed.");
+  }
 });
 
 resizeOverlays();
@@ -1270,18 +1823,22 @@ drawStaticToTexture(0);
 drawOverlayNoise(0, performance.now());
 updateInventoryUI();
 
+// ==================== MAIN RENDER LOOP ====================
 engine.runRenderLoop(() => {
-  if (gameOver || gameWon) return;
+  if (gameState.gameOver || gameState.gameWon) return;
 
   const now = performance.now();
   const elapsed = now - startTime;
 
-  if (elapsed >= GOAL_TIME && !hasVictoryMed) {
-    hasVictoryMed = true;
+  updateStoryProgression(elapsed);
+
+  if (elapsed >= GOAL_TIME && !gameState.hasVictoryMed) {
+    gameState.hasVictoryMed = true;
     updateInventoryUI();
     goalText.textContent = '*** FINAL REMEDY ACQUIRED ***';
     goalText.classList.add('warning');
     flashRed(0.8);
+    showCinematic("THE WAY OUT APPEARS", "Accept your fate. Or escape it?");
   }
 
   const cyclePosition = (elapsed - 30000) % HALLUCINATION_CYCLE;
@@ -1299,6 +1856,10 @@ engine.runRenderLoop(() => {
     drawStaticToTexture(hallucination);
   }
 
+  if (hallucination > 0.5 && Math.random() < 0.04 && !gameState.cinematicActive) {
+    triggerJumpscare();
+  }
+
   drawOverlayNoise(pulse, now);
   drawRedNoise(hallucination, now);
 
@@ -1309,15 +1870,16 @@ engine.runRenderLoop(() => {
     flashRed(0.6);
   }
 
-  if (hallucination > 0.5 && Math.random() < 0.01) {
-    subtitle.textContent = [
-      "It knows where you are.",
-      "The walls are listening.",
-      "Do not trust the red static."
-    ][Math.floor(Math.random() * 3)];
+  if (hallucination > 0.5 && Math.random() < 0.015 && !gameState.cinematicActive) {
+    const dialogues = [
+      { name: "THE JUDGE", text: "How many did you kill?" },
+      { name: "ECHO OF GUILT", text: "They were innocent. You knew that." },
+      { name: "THE WATCHER", text: "Six lives for your carelessness." },
+      { name: "LOST SOUL", text: "Why do I have to remember the dark?" }
+    ];
+    const dialogue = dialogues[Math.floor(Math.random() * dialogues.length)];
+    showDialogue(dialogue.name, dialogue.text);
   }
-
-  randomSubtitle(now);
 
   if (now - lastInventoryUpdate > 100) {
     updateInventoryUI();
